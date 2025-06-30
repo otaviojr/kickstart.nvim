@@ -227,26 +227,16 @@ end ---@diagnostic disable-next-line: undefined-field
 vim.opt.rtp:prepend(lazypath)
 
 -- Define configurations for OpenAI and Claude
-local openai_config = {
-  provider = 'openai',
-  openai = {
-    endpoint = 'https://api.openai.com/v1',
-    model = 'gpt-4o',
-    timeout = 30000,
-    temperature = 0,
-    max_tokens = 8192,
+
+local openai_provider = {
+  opts = {
+    provider = 'openai',
   },
 }
 
-local claude_config = {
-  provider = 'claude',
-  claude = {
-    endpoint = 'https://api.anthropic.com/v1',
-    model = 'claude-3.7',
-    timeout = 30000,
-    temperature = 0,
-    max_tokens = 8192,
-    reasoning_effort = 'medium',
+local claude_provider = {
+  opts = {
+    provider = 'claude',
   },
 }
 
@@ -256,12 +246,12 @@ end
 
 -- Example keybindings to switch between configurations
 vim.keymap.set('n', '<leader>aO', function()
-  SwitchAvanteConfig(openai_config)
+  SwitchAvanteConfig(openai_provider)
 end, {
   desc = 'Switch to OpenAI Model',
 })
 vim.keymap.set('n', '<leader>aC', function()
-  SwitchAvanteConfig(claude_config)
+  SwitchAvanteConfig(claude_provider)
 end, {
   desc = 'Switch to Claude Model',
 })
@@ -308,7 +298,36 @@ require('lazy').setup({
     'yetone/avante.nvim',
     event = 'VeryLazy',
     version = false, -- Never set this value to "*"! Never!
-    opts = openai_config,
+    opts = {
+      mode = 'agentic',
+      provider = 'claude',
+      auto_suggestions_provider = 'claude',
+      providers = {
+        openai = {
+          endpoint = 'https://api.openai.com/v1',
+          model = 'o4-mini',
+          api_key_name = 'OPENAI_API_KEY',
+          extra_request_body = {
+            temperature = 0.75,
+          },
+        },
+        claude = {
+          endpoint = 'https://api.anthropic.com',
+          model = 'claude-sonnet-4-20250514',
+          api_key_name = 'ANTHROPIC_API_KEY',
+          extra_request_body = {
+            temperature = 0.75,
+            max_tokens = 8192,
+          },
+        },
+      },
+      behaviour = {
+        auto_suggestions = false,
+        minimize_diff = false,
+        enable_cursor_planning_mode = true,
+        enable_claude_text_editor_tool_mode = true,
+      },
+    },
     -- if you want to build from source then do `make BUILD_FROM_SOURCE=true`
     build = 'make',
     -- build = "powershell -ExecutionPolicy Bypass -File Build.ps1 -BuildFromSource false" -- for windows
@@ -319,7 +338,7 @@ require('lazy').setup({
       'MunifTanjim/nui.nvim',
       --- The below dependencies are optional,
       'echasnovski/mini.pick', -- for file_selector provider mini.pick
-      'nvim-telescope/telescope.nvim', -- for file_selector provider telescope
+      'nvim-telescop?e/telescope.nvim', -- for file_selector provider telescope
       'hrsh7th/nvim-cmp', -- autocompletion for avante commands and mentions
       'ibhagwan/fzf-lua', -- for file_selector provider fzf
       'nvim-tree/nvim-web-devicons', -- or echasnovski/mini.icons
