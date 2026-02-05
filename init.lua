@@ -302,6 +302,18 @@ require('lazy').setup({
       mode = 'agentic',
       provider = 'claude',
       auto_suggestions_provider = 'claude',
+
+      web_search_engine = {
+        enable = true,
+        provider = 'tavily', -- or "brave" / "searxng" etc
+        proxy = nil, -- e.g. "http://127.0.0.1:7890" if you need a proxy
+      },
+
+      rules = {
+        project_dir = '.avante/rules', -- relative to project root, can also be an absolute path
+        global_dir = vim.fn.expand '~/.config/nvim/avante/rules', -- absolute path (tilde must be expanded!)
+      },
+
       providers = {
         openai = {
           endpoint = 'https://api.openai.com/v1',
@@ -313,7 +325,7 @@ require('lazy').setup({
         },
         claude = {
           endpoint = 'https://api.anthropic.com',
-          model = 'claude-sonnet-4-20250514',
+          model = 'claude-sonnet-4-5-20250929',
           api_key_name = 'ANTHROPIC_API_KEY',
           extra_request_body = {
             temperature = 0.75,
@@ -788,6 +800,10 @@ require('lazy').setup({
         -- But for many setups, the LSP (`ts_ls`) will work just fine
         -- ts_ls = {},
         --
+
+        omnisharp_mono = {
+          cmd = { vim.fn.stdpath 'data' .. '/mason/packages/omnisharp-mono/omnisharp-mono' },
+        },
 
         lua_ls = {
           -- cmd = { ... },
