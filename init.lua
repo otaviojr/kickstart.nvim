@@ -1,4 +1,4 @@
---[[
+--[[a
 
 =====================================================================
 ==================== READ THIS BEFORE CONTINUING ====================
@@ -233,6 +233,33 @@ local avante_opts = {
   provider = 'claude',
   auto_suggestions_provider = 'claude',
 
+  -- Enable planning mode by default
+  planning = {
+    enabled = true,
+    auto_approve = {
+      'read_file',
+      'read_file_toplevel_symbols',
+      'glob',
+      'search_keyword',
+      'rag_search',
+      'git_diff',
+    },
+  },
+  behaviour = {
+    auto_suggestions = true,
+    minimize_diff = true,
+    enable_cursor_planning_mode = true,
+    auto_apply_diff_after_generation = false,
+    auto_approve_tool_permissions = {
+      'read_file',
+      'read_file_toplevel_symbols',
+      'glob',
+      'search_keyword',
+      'rag_search',
+      'git_diff',
+    },
+  },
+
   web_search_engine = {
     enable = true,
     provider = 'tavily',
@@ -250,7 +277,7 @@ local avante_opts = {
       model = 'gpt-5.2',
       api_key_name = 'OPENAI_API_KEY',
       extra_request_body = {
-        temperature = 0.75,
+        temperature = 0.2,
       },
     },
     claude = {
@@ -258,31 +285,48 @@ local avante_opts = {
       model = 'claude-opus-4-6',
       api_key_name = 'ANTHROPIC_API_KEY',
       extra_request_body = {
-        temperature = 0.75,
-        max_tokens = 20480,
+        temperature = 0.2,
+      },
+    },
+    ollama = {
+      __inherited_from = 'openai',
+      endpoint = 'http://192.168.250.28:8000/v1',
+      model = 'local',
+      extra_request_body = {
+        temperature = 0.2,
+        stream = true,
+        max_tokens = 128000,
       },
     },
   },
-  behaviour = {
-    auto_suggestions = true,
-    minimize_diff = true,
-  },
 }
 
-function SwitchAvanteConfig(provider_name)
+function SwitchAvanteConfig(provider_name, model_name, max_tokens)
   avante_opts.provider = provider_name
   avante_opts.auto_suggestions_provider = provider_name
+  avante_opts.providers[avante_opts.provider].model = model_name
+  if max_tokens > 0 then
+    avante_opts.providers[avante_opts.provider].extra_request_body.max_tokens = max_tokens
+  else
+    avante_opts.providers[avante_opts.provider].extra_request_body.max_tokens = nil
+  end
+
   require('avante').setup(avante_opts)
 end
 
--- Example keybindings to switch between configurations
+vim.keymap.set('n', '<leader>a3', function()
+  SwitchAvanteConfig('ollama', 'local', 128000)
+end, {
+  desc = 'Switch to llama-server model (current)',
+})
+
 vim.keymap.set('n', '<leader>a2', function()
-  SwitchAvanteConfig 'openai'
+  SwitchAvanteConfig('openai', 'gpt-5.2', 0)
 end, {
   desc = 'Switch to OpenAI Model',
 })
 vim.keymap.set('n', '<leader>a1', function()
-  SwitchAvanteConfig 'claude'
+  SwitchAvanteConfig('claude', 'claude-opus-4-6', 0)
 end, {
   desc = 'Switch to Claude Model',
 })
