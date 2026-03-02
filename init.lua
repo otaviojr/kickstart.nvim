@@ -246,7 +246,13 @@ local avante_opts = {
   mode = 'agentic',
   provider = 'claude',
   auto_suggestions_provider = 'claude',
-
+  file_selector = {
+    telescope = {},
+  },
+  input = {
+    provider = 'dressing',
+    provider_opts = {},
+  },
   -- Enable planning mode by default
   planning = {
     enabled = true,
@@ -1147,7 +1153,7 @@ require('lazy').setup({
   { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
     build = ':TSUpdate',
-    main = 'nvim-treesitter.configs', -- Sets main module to use for opts
+    main = 'nvim-treesitter', -- Sets main module to use for opts
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
     opts = {
       ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' },
