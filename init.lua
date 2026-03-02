@@ -116,6 +116,20 @@ vim.opt.showmode = false
 --  See `:help 'clipboard'`
 vim.schedule(function()
   vim.opt.clipboard = 'unnamedplus'
+
+  if vim.fn.has 'nvim-0.9' == 1 then
+    vim.g.clipboard = {
+      name = 'osc52',
+      copy = {
+        ['+'] = require('vim.ui.clipboard.osc52').copy '+',
+        ['*'] = require('vim.ui.clipboard.osc52').copy '*',
+      },
+      paste = {
+        ['+'] = require('vim.ui.clipboard.osc52').paste '+',
+        ['*'] = require('vim.ui.clipboard.osc52').paste '*',
+      },
+    }
+  end
 end)
 
 -- Enable break indent
@@ -248,7 +262,7 @@ local avante_opts = {
   behaviour = {
     auto_suggestions = true,
     minimize_diff = true,
-    enable_cursor_planning_mode = true,
+    enable_cursor_planning_mode = false,
     auto_apply_diff_after_generation = false,
     auto_approve_tool_permissions = {
       'read_file',
@@ -291,42 +305,61 @@ local avante_opts = {
     ollama = {
       __inherited_from = 'openai',
       endpoint = 'http://192.168.250.28:8000/v1',
-      model = 'local',
+      model = 'Step3.5-196B-Q4_K_S',
+      timeout = 300000,
+      use_xml_format = true,
       extra_request_body = {
         temperature = 0.2,
         stream = true,
-        max_tokens = 128000,
+        num_ctx = 131072,
+        max_tokens = 32768,
       },
     },
   },
 }
 
-function SwitchAvanteConfig(provider_name, model_name, max_tokens)
+function SwitchAvanteConfig(provider_name, model_name, num_ctx, max_tokens, xml_format)
   avante_opts.provider = provider_name
   avante_opts.auto_suggestions_provider = provider_name
   avante_opts.providers[avante_opts.provider].model = model_name
+  if xml_format ~= nil then
+    avante_opts.providers[avante_opts.provider].use_xml_format = xml_format
+  else
+    avante_opts.providers[avante_opts.provider].use_xml_format = nil
+  end
   if max_tokens > 0 then
     avante_opts.providers[avante_opts.provider].extra_request_body.max_tokens = max_tokens
   else
     avante_opts.providers[avante_opts.provider].extra_request_body.max_tokens = nil
   end
+  if num_ctx > 0 then
+    avante_opts.providers[avante_opts.provider].extra_request_body.num_ctx = num_ctx
+  else
+    avante_opts.providers[avante_opts.provider].extra_request_body.num_ctx = nil
+  end
 
   require('avante').setup(avante_opts)
 end
 
-vim.keymap.set('n', '<leader>a3', function()
-  SwitchAvanteConfig('ollama', 'local', 128000)
+vim.keymap.set('n', '<leader>a4', function()
+  SwitchAvanteConfig('ollama', 'Step3.5-196B-Q4_K_S', 131072, 32768, true)
 end, {
-  desc = 'Switch to llama-server model (current)',
+  desc = 'Switch to Step3.5 model',
+})
+
+vim.keymap.set('n', '<leader>a3', function()
+  SwitchAvanteConfig('ollama', 'Qwen3.5-35B-Q8_0', 131072, 32768, false)
+end, {
+  desc = 'Switch to Qwen3.5 model',
 })
 
 vim.keymap.set('n', '<leader>a2', function()
-  SwitchAvanteConfig('openai', 'gpt-5.2', 0)
+  SwitchAvanteConfig('openai', 'gpt-5.2', 0, 0, nil)
 end, {
   desc = 'Switch to OpenAI Model',
 })
 vim.keymap.set('n', '<leader>a1', function()
-  SwitchAvanteConfig('claude', 'claude-opus-4-6', 0)
+  SwitchAvanteConfig('claude', 'claude-opus-4-6', 0, 0, nil)
 end, {
   desc = 'Switch to Claude Model',
 })

@@ -13,13 +13,5 @@ You are operating inside an agent that can call tools.
 Tool-use requirements:
 - If information is needed from files/repo/search/diffs and it is not in the chat, you MUST call the relevant tool.
 - Never guess file contents or command outputs.
-
-When calling a tool:
-- Respond ONLY with the tool call.
-- No extra text, no markdown, no XML.
-- Use valid JSON arguments.
-
-After tool results:
-- Either call another tool or provide the final answer.
 - Never fabricate tool results.
 
