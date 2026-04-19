@@ -240,8 +240,6 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
 end ---@diagnostic disable-next-line: undefined-field
 vim.opt.rtp:prepend(lazypath)
 
-local llm_config = require 'custom.llm_config'
-
 -- [[ Configure and install plugins ]]
 --
 -- To check the current status of your plugins, run
@@ -263,57 +261,6 @@ require('lazy').setup({
 
   'tpope/vim-sleuth', -- Detect tabstop and shiftwidth automatically
 
-  {
-    'yetone/avante.nvim',
-    event = 'VeryLazy',
-    version = false, -- Never set this value to "*"! Never!
-    opts = llm_config.avante_opts,
-    -- if you want to build from source then you can run `make BUILD_FROM_SOURCE=true`
-    build = 'make',
-    dependencies = {
-      'nvim-treesitter/nvim-treesitter',
-      'stevearc/dressing.nvim',
-      'nvim-lua/plenary.nvim',
-      'MunifTanjim/nui.nvim',
-      --- The below dependencies are optional,
-      'echasnovski/mini.pick', -- for file_selector provider mini.pick
-      'nvim-telescope/telescope.nvim', -- for file_selector provider telescope
-      'hrsh7th/nvim-cmp', -- autocompletion for avante commands and mentions
-      'ibhagwan/fzf-lua', -- for file_selector provider fzf
-      'nvim-tree/nvim-web-devicons', -- or echasnovski/mini.icons
-      {
-        -- support for image pasting
-        'HakonHarnes/img-clip.nvim',
-        event = 'VeryLazy',
-        opts = {
-          -- recommended settings
-          default = {
-            embed_image_as_base64 = false,
-            prompt_for_file_name = false,
-            drag_and_drop = {
-              insert_mode = true,
-            },
-            -- required for Windows users
-            use_absolute_path = true,
-          },
-        },
-      },
-      {
-        'echasnovski/mini.nvim',
-        version = false,
-        opts = {
-          markdown = {
-            mappings = {
-              toggle_fold = 'zo',
-              open_all_folds = 'zR',
-              close_all_folds = 'zM',
-            },
-          },
-        },
-        ft = { 'markdown', 'Avante' },
-      },
-    },
-  },
   { -- Adds git related signs to the gutter, as well as utilities for managing changes
     'lewis6991/gitsigns.nvim',
     opts = {
@@ -681,12 +628,13 @@ require('lazy').setup({
   { -- Colorscheme
     'folke/tokyonight.nvim',
     priority = 1000,
-    config = function()
-      require('tokyonight').setup {
-        styles = {
-          comments = { italic = false },
-        },
-      }
+    opts = {
+      styles = {
+        comments = { italic = false },
+      },
+    },
+    config = function(_, opts)
+      require('tokyonight').setup(opts)
       vim.cmd.colorscheme 'tokyonight-night'
     end,
   },
@@ -699,25 +647,25 @@ require('lazy').setup({
       require('mini.ai').setup { n_lines = 500 }
       require('mini.surround').setup()
       local statusline = require 'mini.statusline'
-      statusline.setup { use_icons = vim.g.have_nerd_font }
-      statusline.section_location = function()
-        return '%2l:%-2v'
-      end
+      statusline.setup {
+        use_icons = vim.g.have_nerd_font,
+        content = {
+          left = { '%<%n %f', '%1m', '%=' },
+          right = { '%{strftime("%H:%M")}', '%l:%c%v' },
+        },
+      }
     end,
   },
 
-  { -- Treesitter
-    'nvim-treesitter/nvim-treesitter',
-    build = ':TSUpdate',
-    main = 'nvim-treesitter',
-    opts = {
-      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' },
-      auto_install = true,
-      highlight = { enable = true, additional_vim_regex_highlighting = { 'ruby' } },
-      indent = { enable = true, disable = { 'ruby' } },
+  {
+    'sudo-tee/opencode.nvim',
+    dependencies = {
+      'nvim-lua/plenary.nvim',
+      'MeanderingProgrammer/render-markdown.nvim',
+      'folke/snacks.nvim',
     },
+    opts = {},
   },
-
   { import = 'custom.plugins' },
 }, {
   ui = {
